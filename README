@@ -1,6 +1,6 @@
 a first draft of my program in python to use the EDIR hardware
 
-The EDIR is a small piec of hardware to receive, decode and transmit the IR signal from many remote command
+The EDIR is a small piece of hardware to receive, decode and transmit the IR signal from many remote command
 
 http://www.electrodragon.com/product/ir-infrared-signal-forwarder-decoder-edir/
 http://www.electrodragon.com/w/EDIR
