@@ -1,4 +1,5 @@
-a first draft of my program in python to use the EDIR hardware
+a simple program in python to use the EDIR hardware
+released under GNU GPLv3
 
 The EDIR is a small piece of hardware to receive, decode and transmit the IR signal from many remote command
 
@@ -8,3 +9,33 @@ http://www.electrodragon.com/w/EDIR
 it has a serial port to connect with an arduino, an esp8266 or a simple usb to serial TTL adapter
 
 in this first draft i write a small program for my pc in python (i'm not a programmer)
+
+the EDIR hardware dialog with serial protocol 9600 baud 8 N 1
+it has some command , sent as hex byte
+
+FAF2 ask to print the version
+FAF5 start learning IR code with auto frequency acquire and exit
+
+	it seems don't work , enter in learning mode but only sometime read the ir command and we don't know when 
+	and why it exit from learning mode
+
+FAFD start learning IR code without auto frequency acquire 
+FAF4  stop learning, we don't know when send it ....
+
+FAF8 enter in sleep mode
+
+FAF7 wake from sleep mode
+FAF3 repeat
+FAF6 reset
+FA is the first byte of the answer
+ED is the last byte of the answer
+
+the edir , when execute a command anser with a 00 result if it's execution is ok and with FF if it's not ok
+when answer with the decoded ir command the first byte is 00 and after start with FA
+
+#test
+#        FA         18       25       xx xx xx xx xx       FC   ED
+#     frame header       frequency                      check sum
+#               data length          data packet                end
+
+
