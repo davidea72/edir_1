@@ -20,6 +20,7 @@ stop='\xED'
 
 
 # first test to see if the hardware work
+# we ask to the hardware the version
 
 ser.write(version)
 print("version",ser.read(105))  # we read at least 105 character , if we haven't it the function exit by the timeout 
@@ -29,74 +30,88 @@ ser.write(start_learning2)
 
 print ("start code acquiring")
 
-risposta=""
-tentativi=0
-while (len(risposta)==0 and tentativi < 10):
+answer=""
+attempt=0
+while (len(answer)==0 and attempt < 10):
 
-        risposta=ser.read(100)
-        tentativi=tentativi+1
-        print "lunghezza risposta dentro secondo while=",
-	print len(risposta),
-	print "tentativo numero ",
-	print tentativi
+        answer=ser.read(100)
+        attempt=attempt+1
+        print "lenght of the answer inside the while loop=",
+	print len(answer),
+	print "attempt number ",
+	print attempt
 
-print "lunghezza risposta fuori secondo while=",
-print len(risposta),
-print "tentativo numero ",
-print tentativi
+print "lenght of the answer outside the while loop=",
+print len(answer),
+print "attempt number ",
+print attempt
 
-if (risposta[0].encode("hex")!="00"):
-       print("risposta 0 =",risposta[0].encode("hex"))
+if (answer[0].encode("hex")!="00"):
+       print("answer 0 =",answer[0].encode("hex"))
        print ("errore")
        exit()
 
 
-print "lunghezza stringa ricevuta=",
-print len(risposta)
+print "lenght of the received string=",
+print len(answer)
 
-carattere='a'
-conteggio=0
+char='a'
+count=0
 checksum=256
 checksum_pos=0
 checksum_is=0
 end=0
-for carattere in risposta:
-        carattere=risposta[conteggio]
-        ascii_char=carattere.encode("hex")
-	if (conteggio==2):
-	      	intero=int(ascii_char,16)
-		print "lunghezza decodifica=",
-	      	print intero,
-		print "aggiunta terzo byte ricevuto"
-              	checksum=checksum-intero
-		checksum_pos=intero+3 #piu uno perche' alla lunghezza siamo sull' ultimo byte
-	if (conteggio==checksum_pos):
+for char in answer:
+        char=answer[count]
+        ascii_char=char.encode("hex")
+	if (count==2):
+	      	integer_number=int(ascii_char,16)
+		print "decoded lenght=",
+	      	print integer_number,
+		print "add the received third byte"
+              	checksum=checksum-integer_number
+		checksum_pos=integer_number+3 # we add the value of 3 becouse we must jump to the first byte
+						# after the decoded string
+	if (count==checksum_pos):
 		checksum_is=ascii_char
 		
-	if(conteggio!=0 and conteggio !=1 and conteggio !=2 and conteggio != checksum_pos and conteggio != checksum_pos+1):
+	if(count!=0 and count !=1 and count !=2 and count != checksum_pos and count != checksum_pos+1):
 		print(ascii_char),
-		#print conteggio,
+		#print count,
 		checksum=checksum-int(ascii_char,16)
 		#print checksum,
-	conteggio=conteggio+1
+	count=count+1
 
-print checksum
+#print checksum
+
+#sample received data for my air conditioner remote command
 #00 fa 23 26 c5 a6 80 80 01 00 8b 9c c5 a6 02 00 8a 8a 8b 9c 6e 48 65 26 02 00 18 12 40 41 06 00 00 00 00 40 09 09 36 ed   accensione  25 gradi ventola max caldo aletta fissa in alto
 #00 fa 23 26 c5 a7 80 80 01 00 8a 9d c5 a7 02 00 8a 8a 8a 9d 6e 48 65 26 02 00 38 12 40 41 06 00 00 00 00 00 0a 0a 52 ed
 #00 fa 23 26 c5 a6 80 80 01 00 8b 9c c5 a6 02 00 8a 8a 8b 9c 6e 48 65 26 02 00 38 12 40 41 06 00 00 00 00 00 0a 09 55 ed
 #00 fa 23 26 c5 a6 80 80 01 00 8b 9c c5 a6 02 00 8a 8a 8b 9c 6e 48 65 26 02 00 38 12 60 41 06 00 00 00 00 10 0a 09 25 ed   accensione  24 gradi ventola max caldo aletta fissa in alto
 #00 fa 23 26 c5 a6 80 80 01 00 8b 9c c5 a6 02 00 8a 89 8b 9c 6e 48 65 26 02 00 38 12 00 42 06 00 00 00 00 20 0a 0a 74 ed   accensione  23 gradi ventola max caldo aletta fissa in alto
-print "nello stream dati il checksum e' di :",
-print risposta[checksum_pos].encode("hex")
-print "il checksum calcolato in decimale e' ",
+edir_checksum=answer[checksum_pos].encode("hex")
+print " "
+print "checksum from the edir hardware :",
+print edir_checksum
+print "computed checksum in decimal ",
 print checksum,
-print " in esadecimale :",
+print " in hex :",
 print hex(checksum)
 
-primo_byte=hex(checksum>>8)
-print "primo byte ottenuto convertendo in esadecimale il valore decimale shiftato di 8 bit =",
-print primo_byte
-secondo_byte=hex(checksum-int(primo_byte,16)*256)
-print "secondo byte ottenuto dalla differenza tra checksum e primo_byte*256=",
-print secondo_byte
+first_byte=hex(checksum>>8)
+print "first byte of the computed checksum in hex value, obtained shifting the computed value by 8 bit =",
+print first_byte
+second_byte=hex(checksum-int(first_byte,16)*256)
+print "second byte computed by the difference between computed checksum and first_byte *256=",
+print second_byte
 
+# if the computed second byte is the same as the checksum from the edir hardware we have received correctly the data
+
+print " the received value is ",
+print edir_checksum
+
+if (int(second_byte,16)==int(edir_checksum,16)):
+	print " the checksum is OK"
+else:
+	print " the checksum is incorect"
