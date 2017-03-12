@@ -10,6 +10,12 @@ it has a serial port to connect with an arduino, an esp8266 or a simple usb to s
 
 in this first draft i write a small program for my pc in python (i'm not a programmer)
 
+i use the python library pyserial , use this command for install it
+
+sudo apt-get install python-pip
+sudo pip install pyserial
+
+
 the EDIR hardware dialog with serial protocol 9600 baud 8 N 1
 it has some command , sent as hex byte
 
