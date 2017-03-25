@@ -1,5 +1,5 @@
 import serial
-ser= serial.Serial('/dev/ttyUSB0', timeout=2)
+ser= serial.Serial('/dev/ttyUSB0', timeout=1)
 print (ser.name)
 
 version='\xFA\xF2'
@@ -32,11 +32,15 @@ print ("start code acquiring")
 
 answer=""
 attempt=0
-while (len(answer)==0 or len(answer)==1 and attempt < 30):  	#we make a 30 second loop (1 second timeout x 30 time)
+while ((len(answer)==0 or len(answer)==1) and attempt < 30):  	#we make a 30 second loop (1 second timeout x 30 time)
 
         answer=ser.read(200)			#we read the serial with a 200 char buffer
-        attempt=attempt+1
-	print(attempt)
+        attempt+=1
+	print("attempt number "+str(attempt))
+
+if(len(answer)==0):				#if we can't obtail an answer (lenght == 0) exit
+	print("no answer from the edir")
+	exit()
 
 if (answer[0].encode("hex")!="00"):		#if the edir recognize the command the first byte is 00 otherwise is FF
        print ("error executing the command")
@@ -59,7 +63,7 @@ for char in answer:
         ascii_char=char.encode("hex")		#convert the char into hex
 	if (count==2):				#if count is equal to 2 it is the data lenght
 	      	integer_number=int(ascii_char,16)	#convert the lenght into decimal
-		checksum_pos=integer_number+3 # we add the value of 3 becouse we must jump to the first byte
+		checksum_pos+=3 # we add the value of 3 becouse we must jump to the first byte
 						# after the decoded string
 	if (count==3):
 		frequency=int(ascii_char,16)	#frequency in decimal
@@ -70,7 +74,7 @@ for char in answer:
 	if(count!=0 and count !=1 and count !=2 and count != checksum_pos and count != checksum_pos+1): #in case we are not at this position : 	0 - executing is ok? 
 		print(ascii_char),									#					1 - frame header
 		checksum=checksum-int(ascii_char,16)							#					2 - data lenght
-	count=count+1											#				checksum_pos - the position where is the checksum	
+	count+=1											#				checksum_pos - the position where is the checksum	
 													#				checksum_pos+1 , end data byte
 
 #print checksum
@@ -124,7 +128,7 @@ count = 1
 for char in answer[1:]:
         char=answer[count]
         ascii_char=char.encode("hex")
-	count=count+1	
+	count+=1	
 	print ascii_char,
 	topolino=topolino+ascii_char+" "
 
